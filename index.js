@@ -11,6 +11,7 @@ var urlencodedParser = bodyparser.urlencoded({ extended: false });
 const database_name = "oes";
 var database, collection;
 app.use(cors());
+app.set("view engine", "ejs");
 
 app.use(express.json());
 MongoClient.connect(mongoconf, { useNewUrlParser: true }, (error, client) => {
@@ -315,5 +316,8 @@ app.post("/getquesstud", urlencodedParser, (req, res) => {
       console.log(result);
     }
   });
+});
+app.get("/codeeditor", urlencodedParser, (req, res) => {
+  res.render("editor");
 });
 app.listen(port, () => console.log(`Express Running ${port}!`));

@@ -44,6 +44,31 @@ app.post("/auth", urlencodedParser, (req, res) => {
     }
   });
 });
+app.post("/authstud", urlencodedParser, (req, res) => {
+  let email = req.body.email;
+  let pass = req.body.pass;
+  // res.send(email + pass);
+  // let email = "shekar@gmail.com";
+  collection = database.collection("students");
+  collection.findOne(
+    { email: email, examid: req.body.examid },
+    (error, result) => {
+      if (error) {
+        throw error;
+      } else {
+        if (result == null) {
+          res.send("total failure");
+        } else {
+          if (result.pass === pass) {
+            res.send({ status: "success", data: result });
+          } else {
+            res.send("failure");
+          }
+        }
+      }
+    }
+  );
+});
 app.post("/setexams", urlencodedParser, (req, res) => {
   let ran = randomstring.generate({
     length: 12,
@@ -150,6 +175,14 @@ app.post("/addstudent", urlencodedParser, (req, res) => {
     else {
       res.send(result);
     }
+  });
+  database.collection("students").insertOne({
+    examid: req.body.examid,
+    id: ran,
+    rollno: req.body.rollno,
+    name: req.body.name,
+    email: req.body.email,
+    pass: req.body.pass
   });
 });
 app.post("/getstudents", urlencodedParser, (req, res) => {

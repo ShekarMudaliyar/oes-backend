@@ -306,4 +306,14 @@ app.post("/addmcq", urlencodedParser, (req, res) => {
     }
   });
 });
+app.post("/getquesstud", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_questions");
+  collection.findOne({ examid: req.body.examid }, (error, result) => {
+    if (error) throw error;
+    else {
+      res.send(result);
+      console.log(result);
+    }
+  });
+});
 app.listen(port, () => console.log(`Express Running ${port}!`));

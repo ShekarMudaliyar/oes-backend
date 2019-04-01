@@ -12,7 +12,6 @@ const database_name = "oes";
 var database, collection;
 app.use(cors());
 app.set("view engine", "ejs");
-
 app.use(express.json());
 MongoClient.connect(mongoconf, { useNewUrlParser: true }, (error, client) => {
   if (error) {

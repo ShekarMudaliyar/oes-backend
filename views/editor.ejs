@@ -68,7 +68,7 @@
   </head>
   <body>
     <div class="main-editor">
-      <button class="btn">Run</button>
+      <button class="btn">Submit</button>
       <div class="first" contenteditable>
         writecode
       </div>
@@ -80,10 +80,10 @@
       const iframe = document.querySelector("iframe");
       const btn = document.querySelector("button");
 
-      btn.addEventListener("click", () => {
-        var html = first.textContent;
-        iframe.src = "data:text/html;charset=utf-8," + encodeURI(html);
-      });
+      // btn.addEventListener("click", () => {
+      //   var html = first.textContent;
+      //   iframe.src = "data:text/html;charset=utf-8," + encodeURI(html);
+      // });
 
       first.addEventListener("keyup", () => {
         var html = first.textContent;

@@ -319,4 +319,200 @@ app.post("/getquesstud", urlencodedParser, (req, res) => {
 app.get("/codeeditor", urlencodedParser, (req, res) => {
   res.render("editor");
 });
+app.post("/createexamans", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_students");
+  collection.findOne({ examid: req.body.examid }, (error, result) => {
+    if (error) throw error;
+    else {
+      // res.send(result);
+      console.log(result);
+      database
+        .collection("exam_answers")
+        .findOne({ studentid: req.body.studid }, (err, resultmore) => {
+          if (error) throw error;
+          else {
+            if (resultmore == null) {
+              database.collection("exam_answers").insertOne({
+                userid: result.userid,
+                examid: req.body.examid,
+                studentid: req.body.studid,
+                fib: [],
+                mcq: [],
+                brief: [],
+                code: []
+              });
+            }
+          }
+        });
+    }
+  });
+});
+app.post("/submitfib", urlencodedParser, (req, res) => {
+  let ran = randomstring.generate({
+    length: 5,
+    charset: "alphanumeric"
+  });
+  collection = database.collection("exam_answers");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      fib: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        answer: req.body.ans,
+        gans: req.body.gans
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          console.log(findres);
+          collection
+            .find({ fib: { $elemMatch: { id: req.body.quesid } } })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  { examid: req.body.examid, "fib.id": req.body.quesid },
+                  { $set: { "fib.$.gans": req.body.gans } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
+app.post("/submitmcq", urlencodedParser, (req, res) => {
+  let ran = randomstring.generate({
+    length: 5,
+    charset: "alphanumeric"
+  });
+  collection = database.collection("exam_answers");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      mcq: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        answer: req.body.ans,
+        gans: req.body.gans
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          console.log(findres);
+          collection
+            .find({ mcq: { $elemMatch: { id: req.body.quesid } } })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  { examid: req.body.examid, "mcq.id": req.body.quesid },
+                  { $set: { "mcq.$.gans": req.body.gans } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
+app.post("/submitbrief", urlencodedParser, (req, res) => {
+  let ran = randomstring.generate({
+    length: 5,
+    charset: "alphanumeric"
+  });
+  collection = database.collection("exam_answers");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      brief: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        answer: req.body.ans,
+        gans: req.body.gans
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          console.log(findres);
+          collection
+            .find({ brief: { $elemMatch: { id: req.body.quesid } } })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  { examid: req.body.examid, "brief.id": req.body.quesid },
+                  { $set: { "brief.$.gans": req.body.gans } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
 app.listen(port, () => console.log(`Express Running ${port}!`));

@@ -6,7 +6,7 @@ var randomstring = require("randomstring");
 const MongoClient = require("mongodb").MongoClient;
 const mongoconf = require("./config/mongo.config");
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 var urlencodedParser = bodyparser.urlencoded({ extended: false });
 const database_name = "oes";
 var database, collection;

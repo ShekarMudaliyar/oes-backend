@@ -24,10 +24,6 @@
         cursor: pointer;
         height: 90vh;
       }
-      .btn:hover {
-        color: white;
-        background: blue;
-      }
 
       .main-editor {
         background: rgba(0, 0, 0, 0.91);
@@ -67,6 +63,7 @@
     </style>
   </head>
   <body>
+    student: <%=studid%> exam: <%=examid%> qid: <%=id%> ques: <%=ques%>
     <div class="main-editor">
       <button class="btn">Submit</button>
       <div class="first" contenteditable>
@@ -80,10 +77,22 @@
       const iframe = document.querySelector("iframe");
       const btn = document.querySelector("button");
 
-      // btn.addEventListener("click", () => {
-      //   var html = first.textContent;
-      //   iframe.src = "data:text/html;charset=utf-8," + encodeURI(html);
-      // });
+      btn.addEventListener("click", () => {
+        var html = first.textContent;
+        //   iframe.src = "data:text/html;charset=utf-8," + encodeURI(html);
+        var items = {
+          studid: "<%=studid%>",
+          examid: "<%=examid%>",
+          quesid: "<%=id%>",
+          ques: "<%=ques%>",
+          gans: html
+        };
+        console.log(items);
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "/submitcode", true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.send(JSON.stringify(items));
+      });
 
       first.addEventListener("keyup", () => {
         var html = first.textContent;

@@ -316,8 +316,26 @@ app.post("/getquesstud", urlencodedParser, (req, res) => {
     }
   });
 });
-app.get("/codeeditor", urlencodedParser, (req, res) => {
-  res.render("editor");
+app.get("/codeeditor", (req, res) => {
+  console.dir(
+    "code editor" +
+      " " +
+      req.query.studid +
+      " " +
+      req.query.examid +
+      " " +
+      req.query.qid +
+      " " +
+      req.query.ques
+  );
+
+  res.render("editor", {
+    studid: req.query.studid,
+    examid: req.query.examid,
+    id: req.query.qid,
+    ques: req.query.ques
+  });
+  // res.send(req.params.studid + req.params.examid);
 });
 app.post("/createexamans", urlencodedParser, (req, res) => {
   collection = database.collection("exam_students");
@@ -500,6 +518,62 @@ app.post("/submitbrief", urlencodedParser, (req, res) => {
                 collection.updateOne(
                   { examid: req.body.examid, "brief.id": req.body.quesid },
                   { $set: { "brief.$.gans": req.body.gans } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
+app.post("/submitcode", urlencodedParser, (req, res) => {
+  let ran = randomstring.generate({
+    length: 5,
+    charset: "alphanumeric"
+  });
+  collection = database.collection("exam_answers");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      code: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        answer: req.body.ans,
+        gans: req.body.gans
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          console.log(findres);
+          collection
+            .find({ code: { $elemMatch: { id: req.body.quesid } } })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  { examid: req.body.examid, "code.id": req.body.quesid },
+                  { $set: { "code.$.gans": req.body.gans } },
                   (err, elseresult) => {
                     if (err) throw err;
                     else {

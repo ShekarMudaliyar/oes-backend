@@ -640,4 +640,19 @@ app.post("/submitcode", urlencodedParser, (req, res) => {
     }
   );
 });
+app.post("/getanswers", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_answers");
+  collection
+    .find({
+      userid: req.body.userid,
+      examid: req.body.examid,
+      studentid: req.body.studid
+    })
+    .toArray((err, result) => {
+      if (err) throw err;
+      else {
+        res.send(result);
+      }
+    });
+});
 app.listen(port, () => console.log(`Express Running ${port}!`));

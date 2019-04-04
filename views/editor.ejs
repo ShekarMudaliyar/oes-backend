@@ -63,7 +63,8 @@
     </style>
   </head>
   <body>
-    <!-- student: <%=studid%> exam: <%=examid%> qid: <%=id%> ques: <%=ques%> -->
+    student: <%=studid%> exam: <%=examid%> qid: <%=id%> ques: <%=ques%>marks:
+    <%=marks%>
     <div class="main-editor">
       <button class="btn">Submit</button>
       <div class="first" contenteditable>
@@ -85,6 +86,8 @@
           examid: "<%=examid%>",
           quesid: "<%=id%>",
           ques: "<%=ques%>",
+          marks: "<%=marks%>",
+
           gans: html
         };
         console.log(items);

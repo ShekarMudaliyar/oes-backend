@@ -224,7 +224,8 @@ app.post("/addbrief", urlencodedParser, (req, res) => {
       brief: {
         id: ran,
         question: req.body.ques,
-        answer: req.body.ans
+        answer: req.body.ans,
+        marks: req.body.marks
       }
     }
   };
@@ -247,7 +248,8 @@ app.post("/addfib", urlencodedParser, (req, res) => {
       fib: {
         id: ran,
         question: req.body.ques,
-        answer: req.body.ans
+        answer: req.body.ans,
+        marks: req.body.marks
       }
     }
   };
@@ -269,7 +271,8 @@ app.post("/addcode", urlencodedParser, (req, res) => {
     $push: {
       code: {
         id: ran,
-        question: req.body.ques
+        question: req.body.ques,
+        marks: req.body.marks
       }
     }
   };
@@ -295,7 +298,8 @@ app.post("/addmcq", urlencodedParser, (req, res) => {
         op1: req.body.op1,
         op2: req.body.op2,
         op3: req.body.op3,
-        op4: req.body.op4
+        op4: req.body.op4,
+        marks: req.body.marks
       }
     }
   };
@@ -326,14 +330,17 @@ app.get("/codeeditor", (req, res) => {
       " " +
       req.query.qid +
       " " +
-      req.query.ques
+      req.query.ques +
+      " " +
+      req.query.marks
   );
 
   res.render("editor", {
     studid: req.query.studid,
     examid: req.query.examid,
     id: req.query.qid,
-    ques: req.query.ques
+    ques: req.query.ques,
+    marks: req.query.marks
   });
   // res.send(req.params.studid + req.params.examid);
 });
@@ -378,7 +385,8 @@ app.post("/submitfib", urlencodedParser, (req, res) => {
         id: req.body.quesid,
         question: req.body.ques,
         answer: req.body.ans,
-        gans: req.body.gans
+        gans: req.body.gans,
+        marks: req.body.marks
       }
     }
   };
@@ -434,7 +442,8 @@ app.post("/submitmcq", urlencodedParser, (req, res) => {
         id: req.body.quesid,
         question: req.body.ques,
         answer: req.body.ans,
-        gans: req.body.gans
+        gans: req.body.gans,
+        marks: req.body.marks
       }
     }
   };
@@ -490,7 +499,8 @@ app.post("/submitbrief", urlencodedParser, (req, res) => {
         id: req.body.quesid,
         question: req.body.ques,
         answer: req.body.ans,
-        gans: req.body.gans
+        gans: req.body.gans,
+        marks: req.body.marks
       }
     }
   };
@@ -546,7 +556,8 @@ app.post("/submitcode", urlencodedParser, (req, res) => {
         id: req.body.quesid,
         question: req.body.ques,
         answer: req.body.ans,
-        gans: req.body.gans
+        gans: req.body.gans,
+        marks: req.body.marks
       }
     }
   };

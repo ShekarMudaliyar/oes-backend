@@ -397,28 +397,38 @@ app.post("/submitfib", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         if (findres != null) {
-          console.log(findres);
+          // console.log(findres);
           collection
-            .find({ fib: { $elemMatch: { id: req.body.quesid } } })
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "fib.id": req.body.quesid
+            })
             .toArray((err, elemres) => {
               console.log(elemres);
               if (elemres.length == 0) {
+                console.log("null");
                 collection.updateOne(query, values, (error, result) => {
                   if (error) throw error;
                   else {
                     res.send(result);
+                    // console.log(result);
                   }
                 });
               } else {
                 console.log("not null");
                 collection.updateOne(
-                  { examid: req.body.examid, "fib.id": req.body.quesid },
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "fib.id": req.body.quesid
+                  },
                   { $set: { "fib.$.gans": req.body.gans } },
                   (err, elseresult) => {
                     if (err) throw err;
                     else {
                       res.send(elseresult);
-                      console.log(elseresult);
+                      // console.log(elseresult);
                     }
                   }
                 );
@@ -454,28 +464,38 @@ app.post("/submitmcq", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         if (findres != null) {
-          console.log(findres);
+          // console.log(findres);
           collection
-            .find({ mcq: { $elemMatch: { id: req.body.quesid } } })
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "mcq.id": req.body.quesid
+            })
             .toArray((err, elemres) => {
               console.log(elemres);
               if (elemres.length == 0) {
+                console.log("null");
                 collection.updateOne(query, values, (error, result) => {
                   if (error) throw error;
                   else {
                     res.send(result);
+                    // console.log(result);
                   }
                 });
               } else {
                 console.log("not null");
                 collection.updateOne(
-                  { examid: req.body.examid, "mcq.id": req.body.quesid },
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "mcq.id": req.body.quesid
+                  },
                   { $set: { "mcq.$.gans": req.body.gans } },
                   (err, elseresult) => {
                     if (err) throw err;
                     else {
                       res.send(elseresult);
-                      console.log(elseresult);
+                      // console.log(elseresult);
                     }
                   }
                 );
@@ -511,28 +531,38 @@ app.post("/submitbrief", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         if (findres != null) {
-          console.log(findres);
+          // console.log(findres);
           collection
-            .find({ brief: { $elemMatch: { id: req.body.quesid } } })
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "brief.id": req.body.quesid
+            })
             .toArray((err, elemres) => {
               console.log(elemres);
               if (elemres.length == 0) {
+                console.log("null");
                 collection.updateOne(query, values, (error, result) => {
                   if (error) throw error;
                   else {
                     res.send(result);
+                    // console.log(result);
                   }
                 });
               } else {
                 console.log("not null");
                 collection.updateOne(
-                  { examid: req.body.examid, "brief.id": req.body.quesid },
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "brief.id": req.body.quesid
+                  },
                   { $set: { "brief.$.gans": req.body.gans } },
                   (err, elseresult) => {
                     if (err) throw err;
                     else {
                       res.send(elseresult);
-                      console.log(elseresult);
+                      // console.log(elseresult);
                     }
                   }
                 );
@@ -568,28 +598,38 @@ app.post("/submitcode", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         if (findres != null) {
-          console.log(findres);
+          // console.log(findres);
           collection
-            .find({ code: { $elemMatch: { id: req.body.quesid } } })
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "code.id": req.body.quesid
+            })
             .toArray((err, elemres) => {
               console.log(elemres);
               if (elemres.length == 0) {
+                console.log("null");
                 collection.updateOne(query, values, (error, result) => {
                   if (error) throw error;
                   else {
                     res.send(result);
+                    // console.log(result);
                   }
                 });
               } else {
                 console.log("not null");
                 collection.updateOne(
-                  { examid: req.body.examid, "code.id": req.body.quesid },
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "code.id": req.body.quesid
+                  },
                   { $set: { "code.$.gans": req.body.gans } },
                   (err, elseresult) => {
                     if (err) throw err;
                     else {
                       res.send(elseresult);
-                      console.log(elseresult);
+                      // console.log(elseresult);
                     }
                   }
                 );

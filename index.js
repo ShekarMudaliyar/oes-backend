@@ -299,6 +299,7 @@ app.post("/addmcq", urlencodedParser, (req, res) => {
         op2: req.body.op2,
         op3: req.body.op3,
         op4: req.body.op4,
+        answer: req.body.ans,
         marks: req.body.marks
       }
     }
@@ -642,6 +643,7 @@ app.post("/submitcode", urlencodedParser, (req, res) => {
 });
 app.post("/getanswers", urlencodedParser, (req, res) => {
   collection = database.collection("exam_answers");
+
   collection
     .find({
       userid: req.body.userid,
@@ -652,7 +654,519 @@ app.post("/getanswers", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         res.send(result);
+        database.collection("exam_assess").findOne(
+          {
+            userid: req.body.userid,
+            examid: req.body.examid,
+            studentid: req.body.studid
+          },
+          (err, findres) => {
+            if (err) throw err;
+            else {
+              if (findres) {
+                console.dir("ok");
+              } else {
+                database.collection("exam_assess").insertOne(
+                  {
+                    userid: req.body.userid,
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    fib: [],
+                    mcq: [],
+                    brief: [],
+                    code: []
+                  },
+                  (err, results) => {
+                    if (err) throw err;
+                    else {
+                      console.log(results);
+                    }
+                  }
+                );
+              }
+            }
+          }
+        );
       }
     });
+});
+
+app.post("/assessfib", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_assess");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      fib: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        marks: req.body.marks,
+        gmarks: req.body.gmarks
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          // console.log(findres);
+          collection
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "fib.id": req.body.quesid
+            })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                console.log("null");
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                    // console.log(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "fib.id": req.body.quesid
+                  },
+                  { $set: { "fib.$.gmarks": req.body.gmarks } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      // console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
+app.post("/assessbrief", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_assess");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      brief: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        marks: req.body.marks,
+        gmarks: req.body.gmarks
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          // console.log(findres);
+          collection
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "brief.id": req.body.quesid
+            })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                console.log("null");
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                    // console.log(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "brief.id": req.body.quesid
+                  },
+                  { $set: { "brief.$.gmarks": req.body.gmarks } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      // console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
+app.post("/assessmcq", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_assess");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+
+  database.collection("exam_answers").findOne(
+    {
+      studentid: req.body.studid,
+      examid: req.body.examid,
+      userid: req.body.userid
+    },
+    (err, results) => {
+      if (err) throw err;
+      else {
+        // console.log(results);
+        let mcq = results.mcq;
+        // console.log(mcq);
+        mcq.forEach(data => {
+          if (data.answer == null) {
+            console.log("null");
+          } else {
+            if (data.answer == data.gans) {
+              console.log("true");
+              console.log(data);
+              values = {
+                $push: {
+                  mcq: {
+                    id: data.id,
+                    question: data.question,
+                    marks: data.marks,
+                    gmarks: data.marks
+                  }
+                }
+              };
+              collection.findOne(
+                { studentid: req.body.studid, examid: req.body.examid },
+                (err, findres) => {
+                  if (err) throw err;
+                  else {
+                    if (findres != null) {
+                      // console.log(findres);
+                      collection
+                        .find({
+                          examid: req.body.examid,
+                          studentid: req.body.studid,
+                          "mcq.id": data.id
+                        })
+                        .toArray((err, elemres) => {
+                          // console.log(elemres);
+                          if (elemres.length == 0) {
+                            console.log("null");
+                            collection.updateOne(
+                              query,
+                              values,
+                              (error, result) => {
+                                if (error) throw error;
+                                else {
+                                  try {
+                                    res.send(JSON.parse(result));
+                                  } catch (error) {
+                                    console.log("err");
+                                  }
+                                }
+                              }
+                            );
+                          } else {
+                            console.log("not null");
+                            collection.updateOne(
+                              {
+                                examid: req.body.examid,
+                                studentid: req.body.studid,
+                                "mcq.id": data.id
+                              },
+                              { $set: { "mcq.$.gmarks": data.marks } },
+                              (err, elseresult) => {
+                                if (err) throw err;
+                                else {
+                                  try {
+                                    res.send(JSON.parse(elseresult));
+                                  } catch (error) {
+                                    console.log("err");
+                                  }
+                                  // console.log(JSON.parse(elseresult));
+                                }
+                              }
+                            );
+                          }
+                        });
+                    }
+                  }
+                }
+              );
+            } else {
+              console.log(data);
+              values = {
+                $push: {
+                  mcq: {
+                    id: data.id,
+                    question: data.question,
+                    marks: data.marks,
+                    gmarks: 0
+                  }
+                }
+              };
+              collection.findOne(
+                { studentid: req.body.studid, examid: req.body.examid },
+                (err, findres) => {
+                  if (err) throw err;
+                  else {
+                    if (findres != null) {
+                      // console.log(findres);
+                      collection
+                        .find({
+                          examid: req.body.examid,
+                          studentid: req.body.studid,
+                          "mcq.id": data.id
+                        })
+                        .toArray((err, elemres) => {
+                          // console.log(elemres);
+                          if (elemres.length == 0) {
+                            console.log("null");
+                            collection.updateOne(
+                              query,
+                              values,
+                              (error, result) => {
+                                if (error) throw error;
+                                else {
+                                  try {
+                                    res.send(JSON.parse(result));
+                                  } catch (error) {
+                                    console.log("err");
+                                  }
+                                }
+                              }
+                            );
+                          } else {
+                            console.log("not null");
+                            collection.updateOne(
+                              {
+                                examid: req.body.examid,
+                                studentid: req.body.studid,
+                                "mcq.id": data.id
+                              },
+                              { $set: { "mcq.$.gmarks": 0 } },
+                              (err, elseresult) => {
+                                if (err) throw err;
+                                else {
+                                  try {
+                                    res.send(JSON.parse(elseresult));
+                                  } catch (error) {
+                                    console.log("err");
+                                  }
+                                  // console.log(JSON.parse(elseresult));
+                                }
+                              }
+                            );
+                          }
+                        });
+                    }
+                  }
+                }
+              );
+            }
+            // res.send(stat);
+          }
+        });
+      }
+      // console.log(stat);
+    }
+  );
+
+  // collection.findOne(
+  //   { studentid: req.body.studid, examid: req.body.examid },
+  //   (err, findres) => {
+  //     if (err) throw err;
+  //     else {
+  //       if (findres != null) {
+  //         // console.log(findres);
+  //         collection
+  //           .find({
+  //             examid: req.body.examid,
+  //             studentid: req.body.studid,
+  //             "mcq.id": req.body.quesid
+  //           })
+  //           .toArray((err, elemres) => {
+  //             console.log(elemres);
+  //             if (elemres.length == 0) {
+  //               console.log("null");
+  //               collection.updateOne(query, values, (error, result) => {
+  //                 if (error) throw error;
+  //                 else {
+  //                   res.send(result);
+  //                   // console.log(result);
+  //                 }
+  //               });
+  //             } else {
+  //               console.log("not null");
+  //               collection.updateOne(
+  //                 {
+  //                   examid: req.body.examid,
+  //                   studentid: req.body.studid,
+  //                   "mcq.id": req.body.quesid
+  //                 },
+  //                 { $set: { "mcq.$.gmarks": req.body.gmarks } },
+  //                 (err, elseresult) => {
+  //                   if (err) throw err;
+  //                   else {
+  //                     res.send(elseresult);
+  //                     // console.log(elseresult);
+  //                   }
+  //                 }
+  //               );
+  //             }
+  //           });
+  //       }
+  //     }
+  //   }
+  // );
+});
+app.post("/assesscode", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_assess");
+  query = { studentid: req.body.studid, examid: req.body.examid };
+  values = {
+    $push: {
+      code: {
+        id: req.body.quesid,
+        question: req.body.ques,
+        marks: req.body.marks,
+        gmarks: req.body.gmarks
+      }
+    }
+  };
+
+  collection.findOne(
+    { studentid: req.body.studid, examid: req.body.examid },
+    (err, findres) => {
+      if (err) throw err;
+      else {
+        if (findres != null) {
+          // console.log(findres);
+          collection
+            .find({
+              examid: req.body.examid,
+              studentid: req.body.studid,
+              "code.id": req.body.quesid
+            })
+            .toArray((err, elemres) => {
+              console.log(elemres);
+              if (elemres.length == 0) {
+                console.log("null");
+                collection.updateOne(query, values, (error, result) => {
+                  if (error) throw error;
+                  else {
+                    res.send(result);
+                    // console.log(result);
+                  }
+                });
+              } else {
+                console.log("not null");
+                collection.updateOne(
+                  {
+                    examid: req.body.examid,
+                    studentid: req.body.studid,
+                    "code.id": req.body.quesid
+                  },
+                  { $set: { "code.$.gmarks": req.body.gmarks } },
+                  (err, elseresult) => {
+                    if (err) throw err;
+                    else {
+                      res.send(elseresult);
+                      // console.log(elseresult);
+                    }
+                  }
+                );
+              }
+            });
+        }
+      }
+    }
+  );
+});
+app.post("/getresult", urlencodedParser, (req, res) => {
+  database.collection("exam_answers").findOne(
+    {
+      examid: req.body.examid,
+      userid: req.body.userid,
+      studentid: req.body.studid
+    },
+    (err, results) => {
+      if (err) throw err;
+      else {
+        if (results != null) {
+          database
+            .collection("exam_assess")
+            .findOne(
+              {
+                userid: req.body.userid,
+                examid: req.body.examid,
+                studentid: req.body.studid
+              },
+              (err, quesres) => {
+                if (err) throw err;
+                else {
+                  let fib = 0;
+                  let mcq = 0;
+                  let brief = 0;
+                  let code = 0;
+                  let fibq = 0;
+                  let mcqq = 0;
+                  let briefq = 0;
+                  let codeq = 0;
+                  quesres.fib.forEach(temp => {
+                    fib += parseInt(temp.gmarks);
+                  });
+                  quesres.mcq.forEach(temp => {
+                    mcq += parseInt(temp.gmarks);
+                  });
+                  quesres.brief.forEach(temp => {
+                    brief += parseInt(temp.gmarks);
+                  });
+                  quesres.code.forEach(temp => {
+                    code += parseInt(temp.gmarks);
+                  });
+                  quesres.fib.forEach(temp => {
+                    fibq += parseInt(temp.marks);
+                  });
+                  quesres.mcq.forEach(temp => {
+                    mcqq += parseInt(temp.marks);
+                  });
+                  quesres.brief.forEach(temp => {
+                    briefq += parseInt(temp.marks);
+                  });
+                  quesres.code.forEach(temp => {
+                    codeq += parseInt(temp.marks);
+                  });
+                  res.send({
+                    fib,
+                    mcq,
+                    brief,
+                    code,
+                    fibq,
+                    mcqq,
+                    briefq,
+                    codeq
+                  });
+                }
+              }
+            );
+        } else {
+          res.send("no data");
+        }
+      }
+    }
+  );
 });
 app.listen(port, () => console.log(`Express Running ${port}!`));

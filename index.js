@@ -2,7 +2,7 @@ const express = require("express");
 const bodyparser = require("body-parser");
 const cors = require("cors");
 var randomstring = require("randomstring");
-
+const socket = require("socket.io");
 const MongoClient = require("mongodb").MongoClient;
 const mongoconf = require("./config/mongo.config");
 const app = express();
@@ -20,6 +20,7 @@ MongoClient.connect(mongoconf, { useNewUrlParser: true }, (error, client) => {
   database = client.db(database_name);
   console.log("Connected to `" + database_name + "`!");
 });
+
 app.get("/", (req, res) => res.send("Welcome to oes dash api"));
 
 app.post("/auth", urlencodedParser, (req, res) => {
@@ -33,12 +34,12 @@ app.post("/auth", urlencodedParser, (req, res) => {
       throw error;
     } else {
       if (result == null) {
-        res.send("total failure");
+        res.send({ status: "total failure" });
       } else {
         if (result.pass === pass) {
           res.send({ status: "success", data: result });
         } else {
-          res.send("failure");
+          res.send({ status: "failure" });
         }
       }
     }
@@ -193,7 +194,7 @@ app.post("/getstudents", urlencodedParser, (req, res) => {
       if (error) throw error;
       else {
         res.send(result);
-        console.log(result);
+        // console.log(result);
       }
     }
   );
@@ -207,7 +208,7 @@ app.post("/getquestions", urlencodedParser, (req, res) => {
       if (error) throw error;
       else {
         res.send(result);
-        console.log(result);
+        // console.log(result);
       }
     }
   );
@@ -317,7 +318,7 @@ app.post("/getquesstud", urlencodedParser, (req, res) => {
     if (error) throw error;
     else {
       res.send(result);
-      console.log(result);
+      // console.log(result);
     }
   });
 });
@@ -1106,62 +1107,60 @@ app.post("/getresult", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         if (results != null) {
-          database
-            .collection("exam_assess")
-            .findOne(
-              {
-                userid: req.body.userid,
-                examid: req.body.examid,
-                studentid: req.body.studid
-              },
-              (err, quesres) => {
-                if (err) throw err;
-                else {
-                  let fib = 0;
-                  let mcq = 0;
-                  let brief = 0;
-                  let code = 0;
-                  let fibq = 0;
-                  let mcqq = 0;
-                  let briefq = 0;
-                  let codeq = 0;
-                  quesres.fib.forEach(temp => {
-                    fib += parseInt(temp.gmarks);
-                  });
-                  quesres.mcq.forEach(temp => {
-                    mcq += parseInt(temp.gmarks);
-                  });
-                  quesres.brief.forEach(temp => {
-                    brief += parseInt(temp.gmarks);
-                  });
-                  quesres.code.forEach(temp => {
-                    code += parseInt(temp.gmarks);
-                  });
-                  quesres.fib.forEach(temp => {
-                    fibq += parseInt(temp.marks);
-                  });
-                  quesres.mcq.forEach(temp => {
-                    mcqq += parseInt(temp.marks);
-                  });
-                  quesres.brief.forEach(temp => {
-                    briefq += parseInt(temp.marks);
-                  });
-                  quesres.code.forEach(temp => {
-                    codeq += parseInt(temp.marks);
-                  });
-                  res.send({
-                    fib,
-                    mcq,
-                    brief,
-                    code,
-                    fibq,
-                    mcqq,
-                    briefq,
-                    codeq
-                  });
-                }
+          database.collection("exam_assess").findOne(
+            {
+              userid: req.body.userid,
+              examid: req.body.examid,
+              studentid: req.body.studid
+            },
+            (err, quesres) => {
+              if (err) throw err;
+              else {
+                let fib = 0;
+                let mcq = 0;
+                let brief = 0;
+                let code = 0;
+                let fibq = 0;
+                let mcqq = 0;
+                let briefq = 0;
+                let codeq = 0;
+                quesres.fib.forEach(temp => {
+                  fib += parseInt(temp.gmarks);
+                });
+                quesres.mcq.forEach(temp => {
+                  mcq += parseInt(temp.gmarks);
+                });
+                quesres.brief.forEach(temp => {
+                  brief += parseInt(temp.gmarks);
+                });
+                quesres.code.forEach(temp => {
+                  code += parseInt(temp.gmarks);
+                });
+                quesres.fib.forEach(temp => {
+                  fibq += parseInt(temp.marks);
+                });
+                quesres.mcq.forEach(temp => {
+                  mcqq += parseInt(temp.marks);
+                });
+                quesres.brief.forEach(temp => {
+                  briefq += parseInt(temp.marks);
+                });
+                quesres.code.forEach(temp => {
+                  codeq += parseInt(temp.marks);
+                });
+                res.send({
+                  fib,
+                  mcq,
+                  brief,
+                  code,
+                  fibq,
+                  mcqq,
+                  briefq,
+                  codeq
+                });
               }
-            );
+            }
+          );
         } else {
           res.send("no data");
         }
@@ -1169,4 +1168,21 @@ app.post("/getresult", urlencodedParser, (req, res) => {
     }
   );
 });
-app.listen(port, () => console.log(`Express Running ${port}!`));
+var server = app.listen(port, () => console.log(`Express Running ${port}!`));
+users = [];
+connections = [];
+var io = socket(server);
+io.on("connection", socket => {
+  console.log(socket.id);
+  socket.on("getdates", data => {
+    collection = database.collection("exam_dates");
+    collection.findOne({ examid: data.examid }, (error, result) => {
+      if (error) throw error;
+      else {
+        io.sockets.emit("date", result);
+        console.log(result);
+      }
+    });
+    // console.log(data);
+  });
+});

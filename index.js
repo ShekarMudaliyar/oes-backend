@@ -1168,6 +1168,67 @@ app.post("/getresult", urlencodedParser, (req, res) => {
     }
   );
 });
+app.post("/remove", urlencodedParser, (req, res) => {
+  type = req.body.type;
+  collection = database.collection("exam_questions");
+  query = { userid: req.body.userid, examid: req.body.examid };
+  switch (type) {
+    case "mcq":
+      values = {
+        $pull: { mcq: { id: req.body.id } }
+      };
+      collection.update(query, values, (error, result) => {
+        if (error) throw error;
+        else {
+          res.send(result);
+        }
+      });
+      break;
+    case "fib":
+      values = {
+        $pull: { fib: { id: req.body.id } }
+      };
+      collection.update(query, values, (error, result) => {
+        if (error) throw error;
+        else {
+          res.send(result);
+        }
+      });
+      break;
+    case "brief":
+      values = {
+        $pull: { brief: { id: req.body.id } }
+      };
+      collection.update(query, values, (error, result) => {
+        if (error) throw error;
+        else {
+          res.send(result);
+        }
+      });
+      break;
+    case "code":
+      values = {
+        $pull: { code: { id: req.body.id } }
+      };
+      collection.update(query, values, (error, result) => {
+        if (error) throw error;
+        else {
+          res.send(result);
+        }
+      });
+      break;
+  }
+  // values = {
+  //   $pull: { mcq: { id: req.body.id } }
+  // };
+  // collection.update(query, values, (error, result) => {
+  //   if (error) throw error;
+  //   else {
+  //     res.send(result);
+  //   }
+  // });
+});
+
 var server = app.listen(port, () => console.log(`Express Running ${port}!`));
 users = [];
 connections = [];

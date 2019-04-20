@@ -1235,15 +1235,26 @@ connections = [];
 var io = socket(server);
 io.on("connection", socket => {
   console.log(socket.id);
-  socket.on("getdates", data => {
-    collection = database.collection("exam_dates");
-    collection.findOne({ examid: data.examid }, (error, result) => {
-      if (error) throw error;
-      else {
-        io.sockets.emit("date", result);
-        console.log(result);
-      }
-    });
-    // console.log(data);
+  socket.on("reset", function(data) {
+    countdown = 1000;
+    io.sockets.emit("timer", { countdown: countdown });
   });
+  // socket.on("getdates", data => {
+  //   collection = database.collection("exam_dates");
+  //   collection.findOne({ examid: data.examid }, (error, result) => {
+  //     if (error) throw error;
+  //     else {
+  //       io.sockets.emit("date", result);
+  //       console.log(result);
+  //     }
+  //   });
+  //   // console.log(data);
+  // });
 });
+var countdown = 1000;
+setInterval(function() {
+  countdown--;
+  console.log(countdown);
+
+  io.sockets.emit("timer", { countdown: countdown });
+}, 1000);

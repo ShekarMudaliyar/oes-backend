@@ -5,6 +5,8 @@ var randomstring = require("randomstring");
 const socket = require("socket.io");
 const MongoClient = require("mongodb").MongoClient;
 const mongoconf = require("./config/mongo.config");
+var nearest = require("nearest-date");
+
 const app = express();
 const port = process.env.PORT || 3000;
 var urlencodedParser = bodyparser.urlencoded({ extended: false });
@@ -1235,26 +1237,135 @@ connections = [];
 var io = socket(server);
 io.on("connection", socket => {
   console.log(socket.id);
-  socket.on("reset", function(data) {
-    countdown = 1000;
-    io.sockets.emit("timer", { countdown: countdown });
-  });
-  // socket.on("getdates", data => {
-  //   collection = database.collection("exam_dates");
-  //   collection.findOne({ examid: data.examid }, (error, result) => {
-  //     if (error) throw error;
-  //     else {
-  //       io.sockets.emit("date", result);
-  //       console.log(result);
-  //     }
-  //   });
-  //   // console.log(data);
+  // socket.on("reset", function(data) {
+  // countdown = 1000;
+  // io.sockets.emit("timer", { countdown: countdown });
   // });
-});
-var countdown = 1000;
-setInterval(function() {
-  countdown--;
-  console.log(countdown);
+  socket.on("getdates", data => {
+    collection = database.collection("exam_dates");
+    collection.findOne({ examid: data.examid }, (error, result) => {
+      if (error) throw error;
+      else {
+        // var checkdate = [];
+        // for (var i = 0; i < result.dates.length; i++) {
+        //   // console.log(result.dates[i]);
+        //   let date = result.dates[i].date;
+        //   let dates = date.split("-");
+        //   let tf = result.dates[i].timefrom;
+        //   let timef = tf.split(":");
+        //   let tempdate = new Date(
+        //     dates[2],
+        //     dates[1] - 1,
+        //     dates[0],
+        //     timef[0],
+        //     timef[1]
+        //   );
+        //   checkdate.push(tempdate);
+        // }
+        // var now = new Date();
+        // console.log(checkdate);
+        // var index = nearest(checkdate, now);
+        // console.log(checkdate[index]);
+        function calcdate() {
+          var date = result.dates[0].date;
+          var dates = date.split("-");
+          var tf = result.dates[0].timefrom;
+          var timef = tf.split(":");
+          var tt = result.dates[0].timeto;
+          var timet = tt.split(":");
+          var eventDate = new Date(
+            dates[2],
+            dates[1] - 1,
+            dates[0],
+            timef[0],
+            timef[1]
+          );
+          var eventendDate = new Date(
+            dates[2],
+            dates[1] - 1,
+            dates[0],
+            timet[0],
+            timet[1]
+          );
+          var currTime = now.getTime();
+          var eventTime = eventDate.getTime();
+          var eventendTime = eventendDate.getTime();
+          var remTime = eventTime - currTime;
+          var s = Math.floor(remTime / 1000);
+          var m = Math.floor(s / 60);
+          var h = Math.floor(m / 60);
+          var d = Math.floor(h / 24);
+          h %= 24;
+          m %= 60;
+          s %= 60;
+          h = h < 10 ? "0" + h : h;
+          m = m < 10 ? "0" + m : m;
+          s = s < 10 ? "0" + s : s;
+          if (eventDate >= now) {
+            // console.log(eventDate, now);
+            io.sockets.emit("date", [h, m, s]);
+          } else {
+            clearInterval(interval);
 
-  io.sockets.emit("timer", { countdown: countdown });
-}, 1000);
+            io.sockets.emit("date", "start");
+          }
+
+          if (
+            (h == 00 || h == "00") &&
+            (m == 00 || m == "00") &&
+            (s == 00 || s == "00")
+          ) {
+            clearInterval(interval);
+            io.sockets.emit("date", "start");
+          }
+          if (currTime > eventTime && currTime < eventendTime) {
+            function examstart() {
+              var now = new Date();
+              var currTime = now.getTime();
+              var remeTime = eventendTime - currTime;
+              var es = Math.floor(remeTime / 1000);
+              var em = Math.floor(es / 60);
+              var eh = Math.floor(em / 60);
+              var ed = Math.floor(eh / 24);
+              eh %= 24;
+              em %= 60;
+              es %= 60;
+              eh = eh < 10 ? "0" + eh : eh;
+              em = em < 10 ? "0" + em : em;
+              es = es < 10 ? "0" + es : es;
+              if (
+                (eh == 00 || eh == "00") &&
+                (em == 00 || em == "00") &&
+                (es == 00 || es == "00")
+              ) {
+                clearInterval(einterval);
+                io.sockets.emit("time", "end");
+              }
+              // console.log([eh, em, es]);
+              io.sockets.emit("time", [eh, em, es]);
+            }
+            var einterval = setInterval(examstart, 1000);
+          } else {
+            io.sockets.emit("time", "end");
+          }
+        }
+        var interval = setInterval(calcdate, 1000);
+        // console.log(firstDate);
+      }
+    });
+    // console.log(data);
+  });
+});
+// var countdown = 1000;
+// setInterval(function() {
+//   countdown--;
+//   console.log(countdown);
+//   var oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+//   var firstDate = new Date();
+//   var secondDate = new Date(2016, 02, 20);
+//   var diffDays = "expired";
+//   if (secondDate >= firstDate) {
+//     diffDays = parseInt((secondDate - firstDate) / oneDay) + " days left";
+//   }
+//   io.sockets.emit("timer", { countdown: countdown });
+// }, 1000);

@@ -1246,33 +1246,36 @@ io.on("connection", socket => {
     collection.findOne({ examid: data.examid }, (error, result) => {
       if (error) throw error;
       else {
-        // var checkdate = [];
-        // for (var i = 0; i < result.dates.length; i++) {
-        //   // console.log(result.dates[i]);
-        //   let date = result.dates[i].date;
-        //   let dates = date.split("-");
-        //   let tf = result.dates[i].timefrom;
-        //   let timef = tf.split(":");
-        //   let tempdate = new Date(
-        //     dates[2],
-        //     dates[1] - 1,
-        //     dates[0],
-        //     timef[0],
-        //     timef[1]
-        //   );
-        //   checkdate.push(tempdate);
-        // }
-        // var now = new Date();
-        // console.log(checkdate);
-        // var index = nearest(checkdate, now);
+        var checkdate = [];
+        for (var i = 0; i < result.dates.length; i++) {
+          // console.log(result.dates[i]);
+          let date = result.dates[i].date;
+          let dates = date.split("-");
+          let tf = result.dates[i].timefrom;
+          let timef = tf.split(":");
+          let tempdate = new Date(
+            dates[2],
+            dates[1] - 1,
+            dates[0],
+            timef[0],
+            timef[1]
+          );
+          checkdate.push(tempdate);
+        }
+        var cnow = new Date();
+        // // console.log(checkdate);
+        var index = nearest(checkdate, cnow);
         // console.log(checkdate[index]);
+
         function calcdate() {
-          var date = result.dates[0].date;
+          var date = result.dates[index].date;
           var dates = date.split("-");
-          var tf = result.dates[0].timefrom;
+          var tf = result.dates[index].timefrom;
           var timef = tf.split(":");
-          var tt = result.dates[0].timeto;
+          var tt = result.dates[index].timeto;
           var timet = tt.split(":");
+          var now = new Date();
+
           var eventDate = new Date(
             dates[2],
             dates[1] - 1,
@@ -1333,6 +1336,8 @@ io.on("connection", socket => {
               eh = eh < 10 ? "0" + eh : eh;
               em = em < 10 ? "0" + em : em;
               es = es < 10 ? "0" + es : es;
+              io.sockets.emit("time", [eh, em, es]);
+
               if (
                 (eh == 00 || eh == "00") &&
                 (em == 00 || em == "00") &&
@@ -1342,7 +1347,6 @@ io.on("connection", socket => {
                 io.sockets.emit("time", "end");
               }
               // console.log([eh, em, es]);
-              io.sockets.emit("time", [eh, em, es]);
             }
             var einterval = setInterval(examstart, 1000);
           } else {

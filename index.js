@@ -1056,7 +1056,7 @@ app.post("/assesscode", urlencodedParser, (req, res) => {
       if (err) throw err;
       else {
         if (findres != null) {
-          // console.log(findres);
+          console.log(findres);
           collection
             .find({
               examid: req.body.examid,
@@ -1169,6 +1169,19 @@ app.post("/getresult", urlencodedParser, (req, res) => {
       }
     }
   );
+});
+app.post("/removedate", urlencodedParser, (req, res) => {
+  collection = database.collection("exam_dates");
+  query = { userid: req.body.userid, examid: req.body.examid };
+  values = {
+    $pull: { dates: { id: req.body.id } }
+  };
+  collection.update(query, values, (error, result) => {
+    if (error) throw error;
+    else {
+      res.send(result);
+    }
+  });
 });
 app.post("/remove", urlencodedParser, (req, res) => {
   type = req.body.type;
